@@ -1,0 +1,8 @@
+{
+  "fixtureFailure": {
+    "message": "VMMS service is Stopped.",
+    "moduleAvailable": 1,
+    "roleAvailable": 1,
+    "vmmsRunning": 0
+  }
+}

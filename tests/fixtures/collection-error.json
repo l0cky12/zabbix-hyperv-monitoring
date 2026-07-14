@@ -1,0 +1,8 @@
+{
+  "fixtureFailure": {
+    "message": "Synthetic PowerShell collection error.",
+    "moduleAvailable": 1,
+    "roleAvailable": 1,
+    "vmmsRunning": 1
+  }
+}

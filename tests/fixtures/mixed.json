@@ -1,0 +1,116 @@
+{
+  "host": {
+    "VmmsRunning": 1
+  },
+  "vms": [
+    {
+      "Id": "11111111-1111-1111-1111-111111111111",
+      "Name": "Running VM",
+      "State": "Running",
+      "UptimeSeconds": 7200,
+      "Heartbeat": "OkApplicationsHealthy",
+      "HeartbeatEnabled": true,
+      "Snapshots": []
+    },
+    {
+      "Id": "22222222-2222-2222-2222-222222222222",
+      "Name": "Off VM \"quoted\" \\ unicode-VM",
+      "State": "Off",
+      "UptimeSeconds": 0,
+      "Heartbeat": "NoContact",
+      "HeartbeatEnabled": true,
+      "Snapshots": [
+        {
+          "CreationTime": "2026-01-01T00:00:00Z",
+          "SnapshotType": "Standard"
+        },
+        {
+          "CreationTime": "2026-06-01T00:00:00Z",
+          "SnapshotType": "Standard"
+        },
+        {
+          "CreationTime": "2026-07-14T00:00:00Z",
+          "SnapshotType": "Replica"
+        }
+      ]
+    },
+    {
+      "Id": "33333333-3333-3333-3333-333333333333",
+      "Name": "Paused VM",
+      "State": "Paused",
+      "UptimeSeconds": 500,
+      "Heartbeat": "",
+      "HeartbeatEnabled": false,
+      "Snapshots": []
+    },
+    {
+      "Id": "44444444-4444-4444-4444-444444444444",
+      "Name": "Heartbeat failed",
+      "State": "Running",
+      "UptimeSeconds": 60,
+      "Heartbeat": "LostCommunication",
+      "HeartbeatEnabled": true,
+      "Snapshots": []
+    },
+    {
+      "Id": "55555555-5555-5555-5555-555555555555",
+      "Name": "Saved VM",
+      "State": "Saved",
+      "UptimeSeconds": 100,
+      "Heartbeat": "NoContact",
+      "HeartbeatEnabled": true,
+      "Snapshots": []
+    }
+  ],
+  "replicas": [
+    {
+      "VMId": "11111111-1111-1111-1111-111111111111",
+      "VMName": "Running VM",
+      "ReplicationMode": "Primary",
+      "ReplicationRelationshipType": "Simple",
+      "ReplicationState": "Replicating",
+      "ReplicationHealth": "Normal",
+      "ReplicationFrequencySec": 300,
+      "LastReplicationTime": "2026-07-14T16:59:00Z",
+      "ReplicationErrors": 0,
+      "MissedReplicationCount": 0,
+      "PendingReplicationSize": 0,
+      "AverageReplicationLatency": 5,
+      "ReplicationHealthDetails": []
+    },
+    {
+      "VMId": "22222222-2222-2222-2222-222222222222",
+      "VMName": "Off VM \"quoted\" \\ unicode-VM",
+      "ReplicationMode": "Replica",
+      "ReplicationRelationshipType": "Simple",
+      "ReplicationState": "Suspended",
+      "ReplicationHealth": "Warning",
+      "ReplicationFrequencySec": 300,
+      "LastReplicationTime": "2026-07-14T15:00:00Z",
+      "ReplicationErrors": 2,
+      "MissedReplicationCount": 3,
+      "PendingReplicationSize": 4096,
+      "AverageReplicationLatency": 20,
+      "ReplicationHealthDetails": [
+        "Network delay"
+      ]
+    },
+    {
+      "VMId": "33333333-3333-3333-3333-333333333333",
+      "VMName": "Paused VM",
+      "ReplicationMode": "Primary",
+      "ReplicationRelationshipType": "Simple",
+      "ReplicationState": "Error",
+      "ReplicationHealth": "Critical",
+      "ReplicationFrequencySec": 30,
+      "LastReplicationTime": "2026-07-14T14:00:00Z",
+      "ReplicationErrors": 4,
+      "MissedReplicationCount": 5,
+      "PendingReplicationSize": 8192,
+      "AverageReplicationLatency": 40,
+      "ReplicationHealthDetails": [
+        "Authentication failed"
+      ]
+    }
+  ]
+}

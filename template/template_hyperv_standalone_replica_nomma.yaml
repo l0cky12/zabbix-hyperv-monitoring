@@ -1,0 +1,1113 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+  - uuid: 5f19541f75ec54989b6ae1771011cae5
+    name: Templates/Virtualization
+  templates:
+  - uuid: 4980ad4f522d52a1bf5f81a96b0aa36a
+    template: Template Hyper-V Standalone Replica by NOMMA
+    name: Template Hyper-V Standalone Replica by NOMMA
+    description: Read-only local monitoring for standalone Hyper-V hosts and direct host-to-host Hyper-V Replica. No clustering, CSV, HA, SCVMM, or WinRM is used.
+    vendor:
+      name: NOMMA
+      version: 1.0.0
+    groups:
+    - name: Templates/Virtualization
+    items:
+    - uuid: 2cbf32f524bb5fdcb443a1e50c855274
+      name: 'Hyper-V: Raw collection'
+      type: ZABBIX_ACTIVE
+      key: hyperv.collect
+      delay: '{$HYPERV.COLLECT.INTERVAL}'
+      history: '0'
+      value_type: TEXT
+      description: One local PowerShell collection for host, VM, checkpoint, heartbeat, and replication data.
+      tags:
+      - tag: component
+        value: raw
+    - uuid: c8b7ba3fbe345eddb3b1e25074166256
+      name: 'Hyper-V: Collection status'
+      type: DEPENDENT
+      key: hyperv.collection.ok
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.collection.ok
+      master_item:
+        key: hyperv.collect
+      tags:
+      - tag: component
+        value: hyper-v
+      triggers:
+      - uuid: f6d097ffb9195f4bade34a4920af456d
+        expression: last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collection.ok)=0
+        name: 'Hyper-V: Data collection failed'
+        priority: HIGH
+        description: Collector returned a controlled failure document. Check the collection error item and agent log.
+        tags:
+        - tag: component
+          value: hyper-v
+        - tag: scope
+          value: availability
+      - uuid: 00ec2de451b05f4dae5fdc9efe3fac26
+        expression: nodata(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collect,{$HYPERV.COLLECT.NODATA})=1
+        name: 'Hyper-V: No collection data'
+        priority: HIGH
+        description: The active master item has not received data. Check agent active-server configuration and UserParameter execution.
+        tags:
+        - tag: component
+          value: hyper-v
+        - tag: scope
+          value: availability
+    - uuid: 42a40c7097ab5de9bd5b8610c3544054
+      name: 'Hyper-V: Hyper-V module available'
+      type: DEPENDENT
+      key: hyperv.module.available
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.collection.moduleAvailable
+      master_item:
+        key: hyperv.collect
+      tags:
+      - tag: component
+        value: hyper-v
+    - uuid: 1bf5360495e759bd9b943236e46f72b6
+      name: 'Hyper-V: Hyper-V role available'
+      type: DEPENDENT
+      key: hyperv.role.available
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.collection.roleAvailable
+      master_item:
+        key: hyperv.collect
+      tags:
+      - tag: component
+        value: hyper-v
+    - uuid: 4b94e75cf494502cb7bc0e04afb96dcb
+      name: 'Hyper-V: VMMS service running'
+      type: DEPENDENT
+      key: hyperv.vmms.running
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.host.vmmsRunning
+      master_item:
+        key: hyperv.collect
+      tags:
+      - tag: component
+        value: hyper-v
+      triggers:
+      - uuid: 807cc94498085fd694ce57099254b70f
+        expression: max(/Template Hyper-V Standalone Replica by NOMMA/hyperv.vmms.running,{$HYPERV.HOST.PROBLEM.TIME})=0
+        name: 'Hyper-V: VMMS service is not running'
+        priority: HIGH
+        tags:
+        - tag: component
+          value: hyper-v
+        - tag: scope
+          value: availability
+        dependencies:
+        - name: 'Hyper-V: Data collection failed'
+          expression: last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collection.ok)=0
+        - name: 'Hyper-V: No collection data'
+          expression: nodata(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collect,{$HYPERV.COLLECT.NODATA})=1
+    - uuid: e586a538dc485ab8898e90b65512778b
+      name: 'Hyper-V: VM count'
+      type: DEPENDENT
+      key: hyperv.vm.count
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.host.vmTotal
+      master_item:
+        key: hyperv.collect
+      tags:
+      - tag: component
+        value: hyper-v
+    - uuid: 112986d6826b5606be7a857b3b347f70
+      name: 'Hyper-V: Running VM count'
+      type: DEPENDENT
+      key: hyperv.vm.running.count
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.host.vmRunning
+      master_item:
+        key: hyperv.collect
+      tags:
+      - tag: component
+        value: hyper-v
+    - uuid: 08f52d84e2485691b374cd73a7636d78
+      name: 'Hyper-V: Off VM count'
+      type: DEPENDENT
+      key: hyperv.vm.off.count
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.host.vmOff
+      master_item:
+        key: hyperv.collect
+      tags:
+      - tag: component
+        value: hyper-v
+    - uuid: 0bbf1647e22f530c892e8f1c874a1de3
+      name: 'Hyper-V: Paused VM count'
+      type: DEPENDENT
+      key: hyperv.vm.paused.count
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.host.vmPaused
+      master_item:
+        key: hyperv.collect
+      tags:
+      - tag: component
+        value: hyper-v
+    - uuid: 9fc4c68f9c705d4e96b90fc274182668
+      name: 'Hyper-V: Saved VM count'
+      type: DEPENDENT
+      key: hyperv.vm.saved.count
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.host.vmSaved
+      master_item:
+        key: hyperv.collect
+      tags:
+      - tag: component
+        value: hyper-v
+    - uuid: cd97a14fd588530d815ea0a84070697e
+      name: 'Hyper-V: Abnormal VM count'
+      type: DEPENDENT
+      key: hyperv.vm.abnormal.count
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.host.vmAbnormal
+      master_item:
+        key: hyperv.collect
+      tags:
+      - tag: component
+        value: hyper-v
+      triggers:
+      - uuid: d0bbd2710f795ee9b83d461712816870
+        expression: min(/Template Hyper-V Standalone Replica by NOMMA/hyperv.vm.abnormal.count,{$HYPERV.HOST.PROBLEM.TIME})>0
+        name: 'Hyper-V: One or more VMs are in a critical or unknown state'
+        priority: AVERAGE
+        tags:
+        - tag: component
+          value: hyper-v
+        - tag: scope
+          value: availability
+        dependencies:
+        - name: 'Hyper-V: Data collection failed'
+          expression: last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collection.ok)=0
+        - name: 'Hyper-V: No collection data'
+          expression: nodata(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collect,{$HYPERV.COLLECT.NODATA})=1
+    - uuid: 14407faf18dc5bb481ea8ce87038b4db
+      name: 'Hyper-V: Primary replica VM count'
+      type: DEPENDENT
+      key: hyperv.replica.primary.count
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.host.replicaPrimary
+      master_item:
+        key: hyperv.collect
+      tags:
+      - tag: component
+        value: replication
+    - uuid: 10eebc45af185aa6a998cbda5a8a109e
+      name: 'Hyper-V: Replica VM count'
+      type: DEPENDENT
+      key: hyperv.replica.secondary.count
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.host.replicaReplica
+      master_item:
+        key: hyperv.collect
+      tags:
+      - tag: component
+        value: replication
+    - uuid: 7abfdae916a151e5befbef46f4c994db
+      name: 'Hyper-V: Unhealthy replication relationship count'
+      type: DEPENDENT
+      key: hyperv.replica.unhealthy.count
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.host.replicaUnhealthy
+      master_item:
+        key: hyperv.collect
+      tags:
+      - tag: component
+        value: replication
+      triggers:
+      - uuid: ab9382b365d055a6903313d32cb40665
+        expression: min(/Template Hyper-V Standalone Replica by NOMMA/hyperv.replica.unhealthy.count,{$HYPERV.REPLICA.WARNING.TIME})>0
+        name: 'Hyper-V: One or more replication relationships are unhealthy'
+        priority: AVERAGE
+        tags:
+        - tag: component
+          value: replication
+        - tag: scope
+          value: availability
+        dependencies:
+        - name: 'Hyper-V: Data collection failed'
+          expression: last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collection.ok)=0
+        - name: 'Hyper-V: No collection data'
+          expression: nodata(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collect,{$HYPERV.COLLECT.NODATA})=1
+    - uuid: 8caa2233c22b5c2d864621dd3b83ded0
+      name: 'Hyper-V: Collection error'
+      type: DEPENDENT
+      key: hyperv.collection.error
+      value_type: TEXT
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.collection.error
+      master_item:
+        key: hyperv.collect
+      tags:
+      - tag: component
+        value: hyper-v
+    discovery_rules:
+    - uuid: 5eab8f78ea35587e8a6904e1907429c8
+      name: Hyper-V VM discovery
+      type: DEPENDENT
+      key: hyperv.vm.discovery
+      lifetime: 7d
+      enabled_lifetime: 1d
+      description: Discovers VMs by stable VM GUID. VM names are metadata only.
+      master_item:
+        key: hyperv.collect
+      lld_macro_paths:
+      - lld_macro: '{#VMID}'
+        path: $.vmId
+      - lld_macro: '{#VMNAME}'
+        path: $.vmName
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.vms
+      item_prototypes:
+      - uuid: 447a07f5763552cb8b8bff66deb4d8a6
+        name: 'VM {#VMNAME}: State code'
+        type: DEPENDENT
+        key: hyperv.vm.state.code[{#VMID}]
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $["vms"][?(@["vmId"] == "{#VMID}")]["stateCode"].first()
+        master_item:
+          key: hyperv.collect
+        tags:
+        - tag: component
+          value: hyper-v
+        - tag: vm
+          value: '{#VMNAME}'
+        - tag: vm_id
+          value: '{#VMID}'
+        valuemap:
+          name: Hyper-V VM state
+        trigger_prototypes:
+        - uuid: 04a825e308755618b3eb63ebf5c98180
+          expression: last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.vm.state.code[{#VMID}])=3 and min(/Template Hyper-V Standalone Replica by NOMMA/hyperv.vm.state.code[{#VMID}],{$HYPERV.VM.STOPPED.WARN})=3
+          name: 'VM {#VMNAME}: VM is off longer than {$HYPERV.VM.STOPPED.WARN}'
+          priority: WARNING
+          description: Off is alerting only after the configured duration; transitional states are not treated as immediate failures.
+          tags:
+          - tag: component
+            value: hyper-v
+          - tag: vm
+            value: '{#VMNAME}'
+          - tag: vm_id
+            value: '{#VMID}'
+          dependencies:
+          - name: 'Hyper-V: Data collection failed'
+            expression: last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collection.ok)=0
+          - name: 'Hyper-V: No collection data'
+            expression: nodata(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collect,{$HYPERV.COLLECT.NODATA})=1
+        - uuid: d513591aba9c5cc3ad7813977100e3fd
+          expression: last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.vm.state.code[{#VMID}])=0 or last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.vm.state.code[{#VMID}])>=100
+          name: 'VM {#VMNAME}: VM is in a critical or unknown state'
+          priority: AVERAGE
+          tags:
+          - tag: component
+            value: hyper-v
+          - tag: vm
+            value: '{#VMNAME}'
+          - tag: vm_id
+            value: '{#VMID}'
+          dependencies:
+          - name: 'Hyper-V: Data collection failed'
+            expression: last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collection.ok)=0
+          - name: 'Hyper-V: No collection data'
+            expression: nodata(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collect,{$HYPERV.COLLECT.NODATA})=1
+      - uuid: e094371014175d53950f3fae180d2d6a
+        name: 'VM {#VMNAME}: State'
+        type: DEPENDENT
+        key: hyperv.vm.state.text[{#VMID}]
+        value_type: CHAR
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $["vms"][?(@["vmId"] == "{#VMID}")]["state"].first()
+        master_item:
+          key: hyperv.collect
+        tags:
+        - tag: component
+          value: hyper-v
+        - tag: vm
+          value: '{#VMNAME}'
+        - tag: vm_id
+          value: '{#VMID}'
+      - uuid: c674194d836a5e1e81bee302bcf1343c
+        name: 'VM {#VMNAME}: Uptime'
+        type: DEPENDENT
+        key: hyperv.vm.uptime[{#VMID}]
+        units: uptime
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $["vms"][?(@["vmId"] == "{#VMID}")]["uptimeSeconds"].first()
+        master_item:
+          key: hyperv.collect
+        tags:
+        - tag: component
+          value: hyper-v
+        - tag: vm
+          value: '{#VMNAME}'
+        - tag: vm_id
+          value: '{#VMID}'
+        trigger_prototypes:
+        - uuid: 5f125356c18f53ba9324e8787d9caba5
+          expression: last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.vm.state.code[{#VMID}])=2 and last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.vm.uptime[{#VMID}])<{$HYPERV.VM.UPTIME.MIN}
+            and last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.vm.uptime[{#VMID}],#1)<last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.vm.uptime[{#VMID}],#2)
+          name: 'VM {#VMNAME}: VM recently restarted'
+          priority: INFO
+          description: Fires only on a detected uptime decrease, then automatically recovers on the next increasing sample.
+          tags:
+          - tag: component
+            value: hyper-v
+          - tag: vm
+            value: '{#VMNAME}'
+          - tag: vm_id
+            value: '{#VMID}'
+          dependencies:
+          - name: 'Hyper-V: Data collection failed'
+            expression: last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collection.ok)=0
+          - name: 'Hyper-V: No collection data'
+            expression: nodata(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collect,{$HYPERV.COLLECT.NODATA})=1
+      - uuid: 6b4ffa9b9b95522b87d1106f08b2b60d
+        name: 'VM {#VMNAME}: Heartbeat status'
+        type: DEPENDENT
+        key: hyperv.vm.heartbeat.code[{#VMID}]
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $["vms"][?(@["vmId"] == "{#VMID}")]["heartbeatCode"].first()
+        master_item:
+          key: hyperv.collect
+        tags:
+        - tag: component
+          value: hyper-v
+        - tag: vm
+          value: '{#VMNAME}'
+        - tag: vm_id
+          value: '{#VMID}'
+        valuemap:
+          name: Hyper-V heartbeat status
+        trigger_prototypes:
+        - uuid: df04b75b75f159a09a8f2805d9905677
+          expression: min(/Template Hyper-V Standalone Replica by NOMMA/hyperv.vm.heartbeat.code[{#VMID}],{$HYPERV.VM.HEARTBEAT.TIME})=2 and last(/Template Hyper-V Standalone Replica
+            by NOMMA/hyperv.vm.state.code[{#VMID}])=2
+          name: 'VM {#VMNAME}: Heartbeat failed while VM is running'
+          priority: HIGH
+          tags:
+          - tag: component
+            value: hyper-v
+          - tag: vm
+            value: '{#VMNAME}'
+          - tag: vm_id
+            value: '{#VMID}'
+          dependencies:
+          - name: 'Hyper-V: Data collection failed'
+            expression: last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collection.ok)=0
+          - name: 'Hyper-V: No collection data'
+            expression: nodata(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collect,{$HYPERV.COLLECT.NODATA})=1
+      - uuid: 770ed9e2def459189cc10402c6320e76
+        name: 'VM {#VMNAME}: Checkpoint count'
+        type: DEPENDENT
+        key: hyperv.vm.checkpoint.count[{#VMID}]
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $["vms"][?(@["vmId"] == "{#VMID}")]["checkpointCount"].first()
+        master_item:
+          key: hyperv.collect
+        tags:
+        - tag: component
+          value: checkpoint
+        - tag: vm
+          value: '{#VMNAME}'
+        - tag: vm_id
+          value: '{#VMID}'
+        trigger_prototypes:
+        - uuid: ca8bbcaf86cc539f832495e5d41b6c72
+          expression: last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.vm.checkpoint.count[{#VMID}])>0 and last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.vm.checkpoint.count[{#VMID}])<={$HYPERV.CHECKPOINT.COUNT.WARN}
+            and last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.vm.checkpoint.oldest.age[{#VMID}])<={$HYPERV.CHECKPOINT.AGE.WARN}
+          name: 'VM {#VMNAME}: VM has checkpoints'
+          priority: INFO
+          tags:
+          - tag: component
+            value: checkpoint
+          - tag: vm
+            value: '{#VMNAME}'
+          - tag: vm_id
+            value: '{#VMID}'
+          dependencies:
+          - name: 'Hyper-V: Data collection failed'
+            expression: last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collection.ok)=0
+          - name: 'Hyper-V: No collection data'
+            expression: nodata(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collect,{$HYPERV.COLLECT.NODATA})=1
+        - uuid: a98d169b90e65bb5afd71287477f9f20
+          expression: last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.vm.checkpoint.count[{#VMID}])>{$HYPERV.CHECKPOINT.COUNT.WARN} and last(/Template Hyper-V Standalone Replica
+            by NOMMA/hyperv.vm.checkpoint.oldest.age[{#VMID}])<={$HYPERV.CHECKPOINT.AGE.WARN}
+          name: 'VM {#VMNAME}: Too many checkpoints'
+          priority: WARNING
+          tags:
+          - tag: component
+            value: checkpoint
+          - tag: vm
+            value: '{#VMNAME}'
+          - tag: vm_id
+            value: '{#VMID}'
+          dependencies:
+          - name: 'Hyper-V: Data collection failed'
+            expression: last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collection.ok)=0
+          - name: 'Hyper-V: No collection data'
+            expression: nodata(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collect,{$HYPERV.COLLECT.NODATA})=1
+      - uuid: 0b355f5bf94d5c71b100812ceef7e067
+        name: 'VM {#VMNAME}: Checkpoints exist'
+        type: DEPENDENT
+        key: hyperv.vm.checkpoint.exists[{#VMID}]
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $["vms"][?(@["vmId"] == "{#VMID}")]["checkpointExists"].first()
+        master_item:
+          key: hyperv.collect
+        tags:
+        - tag: component
+          value: checkpoint
+        - tag: vm
+          value: '{#VMNAME}'
+        - tag: vm_id
+          value: '{#VMID}'
+      - uuid: 8e87bc0660485e97a03d9f1a568d7250
+        name: 'VM {#VMNAME}: Oldest checkpoint age'
+        type: DEPENDENT
+        key: hyperv.vm.checkpoint.oldest.age[{#VMID}]
+        units: s
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $["vms"][?(@["vmId"] == "{#VMID}")]["checkpointOldestAgeSeconds"].first()
+        master_item:
+          key: hyperv.collect
+        tags:
+        - tag: component
+          value: checkpoint
+        - tag: vm
+          value: '{#VMNAME}'
+        - tag: vm_id
+          value: '{#VMID}'
+        trigger_prototypes:
+        - uuid: 2d4f844e5e6655ad92c323e7c8c95dae
+          expression: last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.vm.checkpoint.count[{#VMID}])>0 and last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.vm.checkpoint.oldest.age[{#VMID}])>{$HYPERV.CHECKPOINT.AGE.WARN}
+          name: 'VM {#VMNAME}: Checkpoint is too old'
+          priority: AVERAGE
+          tags:
+          - tag: component
+            value: checkpoint
+          - tag: vm
+            value: '{#VMNAME}'
+          - tag: vm_id
+            value: '{#VMID}'
+          dependencies:
+          - name: 'Hyper-V: Data collection failed'
+            expression: last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collection.ok)=0
+          - name: 'Hyper-V: No collection data'
+            expression: nodata(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collect,{$HYPERV.COLLECT.NODATA})=1
+      - uuid: 24b4f98b5e5655cc8afd62f0481e3901
+        name: 'VM {#VMNAME}: Checkpoint types'
+        type: DEPENDENT
+        key: hyperv.vm.checkpoint.types[{#VMID}]
+        value_type: TEXT
+        description: SnapshotType values after excluding Recovery, Replica, AppConsistentReplica, SyncedReplica, and Planned artifacts. Production-vs-standard user checkpoint intent
+          is not reliably exposed by SnapshotType.
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $["vms"][?(@["vmId"] == "{#VMID}")]["checkpointTypes"].first()
+        master_item:
+          key: hyperv.collect
+        tags:
+        - tag: component
+          value: checkpoint
+        - tag: vm
+          value: '{#VMNAME}'
+        - tag: vm_id
+          value: '{#VMID}'
+    - uuid: 48ecafc7c9105bcfa247deafa06401ca
+      name: Hyper-V Replica relationship discovery
+      type: DEPENDENT
+      key: hyperv.replica.discovery
+      lifetime: 7d
+      enabled_lifetime: 1d
+      description: Discovers each local replication relationship using VM GUID, mode/role, and relationship type.
+      master_item:
+        key: hyperv.collect
+      lld_macro_paths:
+      - lld_macro: '{#REPLICAID}'
+        path: $.replicaId
+      - lld_macro: '{#VMID}'
+        path: $.vmId
+      - lld_macro: '{#VMNAME}'
+        path: $.vmName
+      - lld_macro: '{#REPLICATIONROLE}'
+        path: $.role
+      - lld_macro: '{#RELATIONSHIP}'
+        path: $.relationship
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.replicas
+      item_prototypes:
+      - uuid: 6ef7d56eab90571ebda7e5c6077f52ed
+        name: 'Replica {#VMNAME} ({#REPLICATIONROLE}): Health'
+        type: DEPENDENT
+        key: hyperv.replica.health[{#REPLICAID}]
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $["replicas"][?(@["replicaId"] == "{#REPLICAID}")]["healthCode"].first()
+        master_item:
+          key: hyperv.collect
+        tags:
+        - tag: component
+          value: replication
+        - tag: vm
+          value: '{#VMNAME}'
+        - tag: vm_id
+          value: '{#VMID}'
+        - tag: replication_role
+          value: '{#REPLICATIONROLE}'
+        - tag: relationship
+          value: '{#RELATIONSHIP}'
+        valuemap:
+          name: Hyper-V replication health
+        trigger_prototypes:
+        - uuid: 0c3d97116206527fae3bf2e2ca2e0ca3
+          expression: min(/Template Hyper-V Standalone Replica by NOMMA/hyperv.replica.health[{#REPLICAID}],{$HYPERV.REPLICA.WARNING.TIME})=2 or min(/Template Hyper-V Standalone Replica
+            by NOMMA/hyperv.replica.state.severity[{#REPLICAID}],{$HYPERV.REPLICA.WARNING.TIME})=2
+          name: 'Replica {#VMNAME} ({#REPLICATIONROLE}): Replication warning'
+          priority: WARNING
+          tags:
+          - tag: component
+            value: replication
+          - tag: vm
+            value: '{#VMNAME}'
+          - tag: vm_id
+            value: '{#VMID}'
+          - tag: replication_role
+            value: '{#REPLICATIONROLE}'
+          - tag: relationship
+            value: '{#RELATIONSHIP}'
+          dependencies:
+          - name: 'Hyper-V: Data collection failed'
+            expression: last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collection.ok)=0
+          - name: 'Hyper-V: No collection data'
+            expression: nodata(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collect,{$HYPERV.COLLECT.NODATA})=1
+        - uuid: 109773e19a9b582590f3169aa095ee38
+          expression: min(/Template Hyper-V Standalone Replica by NOMMA/hyperv.replica.health[{#REPLICAID}],{$HYPERV.REPLICA.CRITICAL.TIME})=3 or min(/Template Hyper-V Standalone Replica
+            by NOMMA/hyperv.replica.state.severity[{#REPLICAID}],{$HYPERV.REPLICA.CRITICAL.TIME})=3
+          name: 'Replica {#VMNAME} ({#REPLICATIONROLE}): Replication critical'
+          priority: HIGH
+          tags:
+          - tag: component
+            value: replication
+          - tag: vm
+            value: '{#VMNAME}'
+          - tag: vm_id
+            value: '{#VMID}'
+          - tag: replication_role
+            value: '{#REPLICATIONROLE}'
+          - tag: relationship
+            value: '{#RELATIONSHIP}'
+          dependencies:
+          - name: 'Hyper-V: Data collection failed'
+            expression: last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collection.ok)=0
+          - name: 'Hyper-V: No collection data'
+            expression: nodata(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collect,{$HYPERV.COLLECT.NODATA})=1
+      - uuid: c8b4eb355a3b52bfb0f0f8eda60e9c9d
+        name: 'Replica {#VMNAME} ({#REPLICATIONROLE}): State severity'
+        type: DEPENDENT
+        key: hyperv.replica.state.severity[{#REPLICAID}]
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $["replicas"][?(@["replicaId"] == "{#REPLICAID}")]["stateSeverity"].first()
+        master_item:
+          key: hyperv.collect
+        tags:
+        - tag: component
+          value: replication
+        - tag: vm
+          value: '{#VMNAME}'
+        - tag: vm_id
+          value: '{#VMID}'
+        - tag: replication_role
+          value: '{#REPLICATIONROLE}'
+        - tag: relationship
+          value: '{#RELATIONSHIP}'
+      - uuid: 5e03125cd2af5b60b438a6c52d164309
+        name: 'Replica {#VMNAME} ({#REPLICATIONROLE}): State'
+        type: DEPENDENT
+        key: hyperv.replica.state[{#REPLICAID}]
+        value_type: CHAR
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $["replicas"][?(@["replicaId"] == "{#REPLICAID}")]["state"].first()
+        master_item:
+          key: hyperv.collect
+        tags:
+        - tag: component
+          value: replication
+        - tag: vm
+          value: '{#VMNAME}'
+        - tag: vm_id
+          value: '{#VMID}'
+        - tag: replication_role
+          value: '{#REPLICATIONROLE}'
+        - tag: relationship
+          value: '{#RELATIONSHIP}'
+      - uuid: c5394b904de955dd8545f3fd78e6dd4b
+        name: 'Replica {#VMNAME} ({#REPLICATIONROLE}): Health text'
+        type: DEPENDENT
+        key: hyperv.replica.health.text[{#REPLICAID}]
+        value_type: CHAR
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $["replicas"][?(@["replicaId"] == "{#REPLICAID}")]["health"].first()
+        master_item:
+          key: hyperv.collect
+        tags:
+        - tag: component
+          value: replication
+        - tag: vm
+          value: '{#VMNAME}'
+        - tag: vm_id
+          value: '{#VMID}'
+        - tag: replication_role
+          value: '{#REPLICATIONROLE}'
+        - tag: relationship
+          value: '{#RELATIONSHIP}'
+      - uuid: 3ad7904fc9e55c07a5ae232cb6c65409
+        name: 'Replica {#VMNAME} ({#REPLICATIONROLE}): Relationship type'
+        type: DEPENDENT
+        key: hyperv.replica.relationship[{#REPLICAID}]
+        value_type: CHAR
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $["replicas"][?(@["replicaId"] == "{#REPLICAID}")]["relationship"].first()
+        master_item:
+          key: hyperv.collect
+        tags:
+        - tag: component
+          value: replication
+        - tag: vm
+          value: '{#VMNAME}'
+        - tag: vm_id
+          value: '{#VMID}'
+        - tag: replication_role
+          value: '{#REPLICATIONROLE}'
+        - tag: relationship
+          value: '{#RELATIONSHIP}'
+      - uuid: ae6ebef4d08e55bea91c873f44f1ea7e
+        name: 'Replica {#VMNAME} ({#REPLICATIONROLE}): Replication role'
+        type: DEPENDENT
+        key: hyperv.replica.role[{#REPLICAID}]
+        value_type: CHAR
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $["replicas"][?(@["replicaId"] == "{#REPLICAID}")]["role"].first()
+        master_item:
+          key: hyperv.collect
+        tags:
+        - tag: component
+          value: replication
+        - tag: vm
+          value: '{#VMNAME}'
+        - tag: vm_id
+          value: '{#VMID}'
+        - tag: replication_role
+          value: '{#REPLICATIONROLE}'
+        - tag: relationship
+          value: '{#RELATIONSHIP}'
+      - uuid: 01fcf179e82051c383446b1d4900736b
+        name: 'Replica {#VMNAME} ({#REPLICATIONROLE}): Configured frequency'
+        type: DEPENDENT
+        key: hyperv.replica.frequency[{#REPLICAID}]
+        units: s
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $["replicas"][?(@["replicaId"] == "{#REPLICAID}")]["frequencySeconds"].first()
+        master_item:
+          key: hyperv.collect
+        tags:
+        - tag: component
+          value: replication
+        - tag: vm
+          value: '{#VMNAME}'
+        - tag: vm_id
+          value: '{#VMID}'
+        - tag: replication_role
+          value: '{#REPLICATIONROLE}'
+        - tag: relationship
+          value: '{#RELATIONSHIP}'
+      - uuid: 2dbf4498b54857cabfa0d0086a0a0836
+        name: 'Replica {#VMNAME} ({#REPLICATIONROLE}): Last replication time'
+        type: DEPENDENT
+        key: hyperv.replica.last.epoch[{#REPLICAID}]
+        units: unixtime
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $["replicas"][?(@["replicaId"] == "{#REPLICAID}")]["lastReplicationEpoch"].first()
+        master_item:
+          key: hyperv.collect
+        tags:
+        - tag: component
+          value: replication
+        - tag: vm
+          value: '{#VMNAME}'
+        - tag: vm_id
+          value: '{#VMID}'
+        - tag: replication_role
+          value: '{#REPLICATIONROLE}'
+        - tag: relationship
+          value: '{#RELATIONSHIP}'
+      - uuid: a23f23f0dd5b5c949d017642f8f81c43
+        name: 'Replica {#VMNAME} ({#REPLICATIONROLE}): Replication errors'
+        type: DEPENDENT
+        key: hyperv.replica.errors[{#REPLICAID}]
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $["replicas"][?(@["replicaId"] == "{#REPLICAID}")]["replicationErrors"].first()
+        master_item:
+          key: hyperv.collect
+        tags:
+        - tag: component
+          value: replication
+        - tag: vm
+          value: '{#VMNAME}'
+        - tag: vm_id
+          value: '{#VMID}'
+        - tag: replication_role
+          value: '{#REPLICATIONROLE}'
+        - tag: relationship
+          value: '{#RELATIONSHIP}'
+      - uuid: be9731c841295f23956b01407fffaeba
+        name: 'Replica {#VMNAME} ({#REPLICATIONROLE}): Missed replications'
+        type: DEPENDENT
+        key: hyperv.replica.missed[{#REPLICAID}]
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $["replicas"][?(@["replicaId"] == "{#REPLICAID}")]["missedReplications"].first()
+        master_item:
+          key: hyperv.collect
+        tags:
+        - tag: component
+          value: replication
+        - tag: vm
+          value: '{#VMNAME}'
+        - tag: vm_id
+          value: '{#VMID}'
+        - tag: replication_role
+          value: '{#REPLICATIONROLE}'
+        - tag: relationship
+          value: '{#RELATIONSHIP}'
+      - uuid: 1da980bf9f26545a890549673a6a1555
+        name: 'Replica {#VMNAME} ({#REPLICATIONROLE}): Pending replication bytes'
+        type: DEPENDENT
+        key: hyperv.replica.pending[{#REPLICAID}]
+        units: B
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $["replicas"][?(@["replicaId"] == "{#REPLICAID}")]["pendingBytes"].first()
+        master_item:
+          key: hyperv.collect
+        tags:
+        - tag: component
+          value: replication
+        - tag: vm
+          value: '{#VMNAME}'
+        - tag: vm_id
+          value: '{#VMID}'
+        - tag: replication_role
+          value: '{#REPLICATIONROLE}'
+        - tag: relationship
+          value: '{#RELATIONSHIP}'
+      - uuid: cb7257d05c1a5e5e8b0d46172fcd2e55
+        name: 'Replica {#VMNAME} ({#REPLICATIONROLE}): Average replication latency'
+        type: DEPENDENT
+        key: hyperv.replica.latency.avg[{#REPLICAID}]
+        units: s
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $["replicas"][?(@["replicaId"] == "{#REPLICAID}")]["averageLatencySeconds"].first()
+        master_item:
+          key: hyperv.collect
+        tags:
+        - tag: component
+          value: replication
+        - tag: vm
+          value: '{#VMNAME}'
+        - tag: vm_id
+          value: '{#VMID}'
+        - tag: replication_role
+          value: '{#REPLICATIONROLE}'
+        - tag: relationship
+          value: '{#RELATIONSHIP}'
+      - uuid: 704e283bacbc5dc6949dd11742f16ed6
+        name: 'Replica {#VMNAME} ({#REPLICATIONROLE}): Health details'
+        type: DEPENDENT
+        key: hyperv.replica.health.details[{#REPLICAID}]
+        value_type: TEXT
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $["replicas"][?(@["replicaId"] == "{#REPLICAID}")]["healthDetails"].first()
+        master_item:
+          key: hyperv.collect
+        tags:
+        - tag: component
+          value: replication
+        - tag: vm
+          value: '{#VMNAME}'
+        - tag: vm_id
+          value: '{#VMID}'
+        - tag: replication_role
+          value: '{#REPLICATIONROLE}'
+        - tag: relationship
+          value: '{#RELATIONSHIP}'
+      - uuid: 51803d605f8853b5b5b8b2eb28e998df
+        name: 'Replica {#VMNAME} ({#REPLICATIONROLE}): Replication age'
+        type: DEPENDENT
+        key: hyperv.replica.lag[{#REPLICAID}]
+        units: s
+        preprocessing:
+        - type: JSONPATH
+          parameters:
+          - $["replicas"][?(@["replicaId"] == "{#REPLICAID}")]["lagSeconds"].first()
+        master_item:
+          key: hyperv.collect
+        tags:
+        - tag: component
+          value: replication
+        - tag: vm
+          value: '{#VMNAME}'
+        - tag: vm_id
+          value: '{#VMID}'
+        - tag: replication_role
+          value: '{#REPLICATIONROLE}'
+        - tag: relationship
+          value: '{#RELATIONSHIP}'
+        trigger_prototypes:
+        - uuid: 9edfc7c117455982b49bbf8192deaafb
+          expression: last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.replica.last.epoch[{#REPLICAID}])>0 and last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.replica.lag[{#REPLICAID}])>(last(/Template
+            Hyper-V Standalone Replica by NOMMA/hyperv.replica.frequency[{#REPLICAID}])*2+{$HYPERV.REPLICA.LAG.WARN}) and last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.replica.lag[{#REPLICAID}])<=(last(/Template
+            Hyper-V Standalone Replica by NOMMA/hyperv.replica.frequency[{#REPLICAID}])*2+{$HYPERV.REPLICA.LAG.CRIT})
+          name: 'Replica {#VMNAME} ({#REPLICATIONROLE}): Replication is delayed'
+          priority: WARNING
+          tags:
+          - tag: component
+            value: replication
+          - tag: vm
+            value: '{#VMNAME}'
+          - tag: vm_id
+            value: '{#VMID}'
+          - tag: replication_role
+            value: '{#REPLICATIONROLE}'
+          - tag: relationship
+            value: '{#RELATIONSHIP}'
+          dependencies:
+          - name: 'Hyper-V: Data collection failed'
+            expression: last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collection.ok)=0
+          - name: 'Hyper-V: No collection data'
+            expression: nodata(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collect,{$HYPERV.COLLECT.NODATA})=1
+        - uuid: 48c861369c9f5943b44432f93298e046
+          expression: last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.replica.last.epoch[{#REPLICAID}])>0 and last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.replica.lag[{#REPLICAID}])>(last(/Template
+            Hyper-V Standalone Replica by NOMMA/hyperv.replica.frequency[{#REPLICAID}])*2+{$HYPERV.REPLICA.LAG.CRIT})
+          name: 'Replica {#VMNAME} ({#REPLICATIONROLE}): Replication delay is critical'
+          priority: HIGH
+          tags:
+          - tag: component
+            value: replication
+          - tag: vm
+            value: '{#VMNAME}'
+          - tag: vm_id
+            value: '{#VMID}'
+          - tag: replication_role
+            value: '{#REPLICATIONROLE}'
+          - tag: relationship
+            value: '{#RELATIONSHIP}'
+          dependencies:
+          - name: 'Hyper-V: Data collection failed'
+            expression: last(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collection.ok)=0
+          - name: 'Hyper-V: No collection data'
+            expression: nodata(/Template Hyper-V Standalone Replica by NOMMA/hyperv.collect,{$HYPERV.COLLECT.NODATA})=1
+    tags:
+    - tag: class
+      value: virtualization
+    - tag: target
+      value: hyper-v
+    macros:
+    - macro: '{$HYPERV.COLLECT.INTERVAL}'
+      value: 1m
+      description: Master collection interval.
+    - macro: '{$HYPERV.COLLECT.NODATA}'
+      value: 5m
+      description: No-data duration before collector unavailable alert.
+    - macro: '{$HYPERV.HOST.PROBLEM.TIME}'
+      value: 3m
+      description: Host condition persistence.
+    - macro: '{$HYPERV.VM.STOPPED.WARN}'
+      value: 15m
+      description: Duration an Off VM may remain off before warning.
+    - macro: '{$HYPERV.VM.HEARTBEAT.TIME}'
+      value: 3m
+      description: Running VM heartbeat failure persistence.
+    - macro: '{$HYPERV.VM.UPTIME.MIN}'
+      value: 10m
+      description: Maximum uptime for restart event; used with detected uptime decrease.
+    - macro: '{$HYPERV.CHECKPOINT.COUNT.WARN}'
+      value: '2'
+      description: Maximum checkpoint count before warning.
+    - macro: '{$HYPERV.CHECKPOINT.AGE.WARN}'
+      value: 7d
+      description: Maximum checkpoint age.
+    - macro: '{$HYPERV.REPLICA.WARNING.TIME}'
+      value: 10m
+      description: Persistence for warning replication state/health.
+    - macro: '{$HYPERV.REPLICA.CRITICAL.TIME}'
+      value: 5m
+      description: Persistence for critical replication state/health.
+    - macro: '{$HYPERV.REPLICA.LAG.WARN}'
+      value: 10m
+      description: Extra lag tolerance beyond twice configured frequency.
+    - macro: '{$HYPERV.REPLICA.LAG.CRIT}'
+      value: 30m
+      description: Critical extra lag tolerance beyond twice configured frequency.
+    valuemaps:
+    - uuid: a0788d92367d5458a37e9ee5fe2938c3
+      name: Hyper-V VM state
+      mappings:
+      - value: '0'
+        newvalue: Unknown
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Running
+      - value: '3'
+        newvalue: 'Off'
+      - value: '4'
+        newvalue: Stopping
+      - value: '6'
+        newvalue: Saved
+      - value: '9'
+        newvalue: Paused
+      - value: '10'
+        newvalue: Starting
+      - value: '11'
+        newvalue: Reset
+      - value: '12'
+        newvalue: Saving
+      - value: '13'
+        newvalue: Pausing
+      - value: '14'
+        newvalue: Resuming
+      - value: '15'
+        newvalue: FastSaved
+      - value: '16'
+        newvalue: FastSaving
+      - value: '17'
+        newvalue: ForceShutdown
+      - value: '18'
+        newvalue: ForceReboot
+      - value: '19'
+        newvalue: Hibernated
+      - value: '20'
+        newvalue: ComponentServicing
+      - value: '101'
+        newvalue: RunningCritical
+      - value: '102'
+        newvalue: OffCritical
+      - value: '103'
+        newvalue: StoppingCritical
+      - value: '104'
+        newvalue: SavedCritical
+      - value: '105'
+        newvalue: PausedCritical
+      - value: '106'
+        newvalue: StartingCritical
+      - value: '107'
+        newvalue: ResetCritical
+      - value: '108'
+        newvalue: SavingCritical
+      - value: '109'
+        newvalue: PausingCritical
+      - value: '110'
+        newvalue: ResumingCritical
+      - value: '111'
+        newvalue: FastSavedCritical
+      - value: '112'
+        newvalue: FastSavingCritical
+    - uuid: 460d94c3cb365bb7849e693f5fff5be5
+      name: Hyper-V heartbeat status
+      mappings:
+      - value: '0'
+        newvalue: Unknown
+      - value: '1'
+        newvalue: Healthy
+      - value: '2'
+        newvalue: No heartbeat
+      - value: '3'
+        newvalue: Integration service unavailable/disabled
+      - value: '4'
+        newvalue: VM not running
+    - uuid: 1fe842143f185d059d6012bc32a972bc
+      name: Hyper-V replication health
+      mappings:
+      - value: '0'
+        newvalue: Not applicable/unknown
+      - value: '1'
+        newvalue: Normal
+      - value: '2'
+        newvalue: Warning
+      - value: '3'
+        newvalue: Critical

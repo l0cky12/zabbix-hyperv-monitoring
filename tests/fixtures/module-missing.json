@@ -1,0 +1,8 @@
+{
+  "fixtureFailure": {
+    "message": "Hyper-V PowerShell module is unavailable.",
+    "moduleAvailable": 0,
+    "roleAvailable": 0,
+    "vmmsRunning": 0
+  }
+}
