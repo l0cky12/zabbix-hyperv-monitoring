@@ -18,6 +18,7 @@ walk(data)
 uids=[o['uuid'] for o in objs]
 assert len(uids)==len(set(uids)), 'duplicate UUIDs'
 assert all(re.fullmatch(r'[0-9a-f]{32}',x) for x in uids), 'bad UUID'
+assert all(uuid.UUID(x).version == 4 for x in uids), 'UUIDv4 is required'
 keys=[]
 for i in t.get('items',[]): keys.append(i['key'])
 for d in t.get('discovery_rules',[]):
