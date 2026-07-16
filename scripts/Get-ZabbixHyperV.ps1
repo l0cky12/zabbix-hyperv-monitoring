@@ -26,6 +26,13 @@ function ConvertTo-EpochSeconds {
     } catch { return [int64]0 }
 }
 
+function ConvertTo-IntegerSeconds {
+    param($Value,[int64]$Default=0)
+    if ($null -eq $Value -or [string]::IsNullOrWhiteSpace([string]$Value)) { return $Default }
+    if ($Value -is [timespan]) { return [int64][math]::Floor($Value.TotalSeconds) }
+    try { return [int64]$Value } catch { return $Default }
+}
+
 function Get-StateCode {
     param([string]$State)
     $map = @{
@@ -70,7 +77,7 @@ function Convert-SourceData {
         $vmId = ([guid](Get-PropertyValue $vm @('Id','VMId'))).ToString('D').ToLowerInvariant()
         $state = [string](Get-PropertyValue $vm @('State') 'Other')
         $uptimeRaw = Get-PropertyValue $vm @('UptimeSeconds','Uptime') 0
-        if ($uptimeRaw -is [timespan]) { $uptime = [int64][math]::Floor($uptimeRaw.TotalSeconds) } else { $uptime = [int64]$uptimeRaw }
+        $uptime = ConvertTo-IntegerSeconds $uptimeRaw 0
         $heartbeat = [string](Get-PropertyValue $vm @('Heartbeat') '')
         $heartbeatEnabledRaw = Get-PropertyValue $vm @('HeartbeatEnabled') $null
 
@@ -111,7 +118,7 @@ function Convert-SourceData {
             replicaId=('{0}|{1}|{2}' -f $vmId,$mode.ToLowerInvariant(),$relationship.ToLowerInvariant());
             vmId=$vmId; vmName=[string](Get-PropertyValue $rep @('VMName','Name') ''); role=$mode.ToLowerInvariant();
             relationship=$relationship; state=$state; stateSeverity=[int]$stateSeverity; health=$health; healthCode=[int]$healthCode;
-            frequencySeconds=[int](Get-PropertyValue $rep @('ReplicationFrequencySec','FrequencySec') 0);
+            frequencySeconds=[int](ConvertTo-IntegerSeconds (Get-PropertyValue $rep @('ReplicationFrequencySec','FrequencySec') 0) 0);
             lastReplicationEpoch=$lastEpoch; lagSeconds=$lag;
             replicationErrors=[int](Get-PropertyValue $rep @('ReplicationErrors','ReplicationFailureCount') 0);
             missedReplications=[int](Get-PropertyValue $rep @('MissedReplicationCount','ReplicationMissCount') 0);
