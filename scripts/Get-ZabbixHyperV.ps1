@@ -190,7 +190,7 @@ try {
                         VMId=$vmId; VMName=[string](Get-PropertyValue $rep @('VMName','Name') ''); ReplicationMode=[string](Get-PropertyValue $rep @('ReplicationMode','Mode') 'None');
                         ReplicationRelationshipType=$rel; ReplicationState=[string](Get-PropertyValue $rep @('ReplicationState','State') 'Disabled');
                         ReplicationHealth=[string](Get-PropertyValue $rep @('ReplicationHealth','Health') 'NotApplicable');
-                        ReplicationFrequencySec=[int](Get-PropertyValue $rep @('ReplicationFrequencySec','FrequencySec') 0);
+                        ReplicationFrequencySec=[int](ConvertTo-IntegerSeconds (Get-PropertyValue $rep @('ReplicationFrequencySec','FrequencySec') 0) 0);
                         LastReplicationTime=Get-PropertyValue $rep @('LastReplicationTime') (Get-PropertyValue $stats @('LastReplicationTime'));
                         ReplicationHealthDetails=Get-PropertyValue $stats @('ReplicationHealthDetails') @();
                         ReplicationErrors=[int](Get-PropertyValue $stats @('ReplicationErrors','ReplicationFailureCount') 0);
