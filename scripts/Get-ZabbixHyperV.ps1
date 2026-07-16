@@ -196,7 +196,7 @@ try {
                         ReplicationErrors=[int](Get-PropertyValue $stats @('ReplicationErrors','ReplicationFailureCount') 0);
                         MissedReplicationCount=[int](Get-PropertyValue $stats @('MissedReplicationCount','ReplicationMissCount') 0);
                         PendingReplicationSize=[int64](Get-PropertyValue $stats @('PendingReplicationSize') 0);
-                        AverageReplicationLatency=[int64](Get-PropertyValue $stats @('AverageReplicationLatency','ReplicationLatency') 0)
+                        AverageReplicationLatency=[int64](ConvertTo-IntegerSeconds (Get-PropertyValue $stats @('AverageReplicationLatency','ReplicationLatency') 0) 0)
                     }
                 }
                 $source = [pscustomobject]@{ host=[pscustomobject]@{ VmmsRunning=1 }; vms=@($vmSource); replicas=@($repSource) }
