@@ -19,6 +19,7 @@ zabbix_export:
       type: ZABBIX_ACTIVE
       key: hyperv.collect
       delay: '{$HYPERV.COLLECT.INTERVAL}'
+      timeout: 30s
       history: '0'
       value_type: TEXT
       description: One local PowerShell collection for host, VM, checkpoint, heartbeat, and replication data.
