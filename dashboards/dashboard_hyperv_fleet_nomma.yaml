@@ -1,0 +1,68 @@
+zabbix_export:
+  version: '7.4'
+  dashboards:
+    - uuid: 294379570891461f91cb4315d1ba7cf2
+      name: 'NOMMA Hyper-V Fleet Health'
+      display_period: '30'
+      auto_start: 'YES'
+      pages:
+        - name: Overview
+          widgets:
+            - type: problemsbysv
+              name: 'All Hyper-V problem severity'
+              width: '18'
+              height: '5'
+            - type: problems
+              name: 'Hyper-V host health problems'
+              x: '18'
+              width: '27'
+              height: '5'
+              fields:
+                - type: INTEGER
+                  name: show
+                  value: '3'
+                - type: INTEGER
+                  name: show_lines
+                  value: '10'
+                - type: INTEGER
+                  name: show_opdata
+                  value: '1'
+                - type: INTEGER
+                  name: show_tags
+                  value: '2'
+                - type: INTEGER
+                  name: tags.0.operator
+                  value: '1'
+                - type: STRING
+                  name: tags.0.tag
+                  value: component
+                - type: STRING
+                  name: tags.0.value
+                  value: hyper-v
+            - type: problems
+              name: 'Hyper-V Replica problems'
+              x: '45'
+              width: '27'
+              height: '5'
+              fields:
+                - type: INTEGER
+                  name: show
+                  value: '3'
+                - type: INTEGER
+                  name: show_lines
+                  value: '10'
+                - type: INTEGER
+                  name: show_opdata
+                  value: '1'
+                - type: INTEGER
+                  name: show_tags
+                  value: '2'
+                - type: INTEGER
+                  name: tags.0.operator
+                  value: '1'
+                - type: STRING
+                  name: tags.0.tag
+                  value: component
+                - type: STRING
+                  name: tags.0.value
+                  value: replication
